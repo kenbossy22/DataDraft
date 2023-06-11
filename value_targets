@@ -1,0 +1,25 @@
+# Import necessary libraries
+import pandas as pd
+import plotly.express as px
+
+# Load the data
+df_rating_diff = pd.read_excel('Player Rating Difference.xlsx')
+
+# Filter the data to include only players who had a negative Rating Difference and a Player Rating of 60 or above
+negative_diff_high_rating_players = df_rating_diff[(df_rating_diff['Rating Difference'] < 0) & (df_rating_diff['Player Rating'] >= 60)]
+
+# Create a scatter plot with tooltips
+fig = px.scatter(negative_diff_high_rating_players, x='5 Year Rating Average', y='Player Rating', color='Pos', hover_data=['Player Name'], width=800, height=600)
+
+# Show the plot
+fig.show()
+
+
+# Filter the data to include only players who had a negative Rating Difference and a Player Rating of 60 or above
+negative_diff_high_rating_players = df_rating_diff[(df_rating_diff['Rating Difference'] < 0) & (df_rating_diff['Player Rating'] >= 60)]
+
+# Sort the players by Rating Difference
+sorted_players = negative_diff_high_rating_players.sort_values('Rating Difference')
+
+# Display the full sorted list of players
+sorted_players[['Player Name', 'Pos', '5 Year Rating Average', 'Player Rating', 'Rating Difference']]
