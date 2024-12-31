@@ -49,7 +49,20 @@
         const scatterplot = document.getElementById('scatterplot');
 
         data.forEach(point => {
-          const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name, Games, G, A, Pts, PPP, ShotsPG, HitsPG, BlocksPG } = point;
+          const { 
+            'Completeness Rating': x, 
+            'Weighted_Rating': z, 
+            'PtPG': y, 
+            'Player Name': name, 
+            Games, 
+            G, 
+            A, 
+            Pts, 
+            PPP, 
+            ShotsPG, 
+            HitsPG, 
+            BlocksPG 
+          } = point;
 
           // Adjust the scale for better visualization
           const scaledX = x / 10;
@@ -70,15 +83,15 @@
             `Player: ${name}
 Completeness Rating: ${x.toFixed(1)}
 Weighted Rating: ${z.toFixed(1)}
-PtPG: ${y.toFixed(1)}
+Points per Game (PtPG): ${y.toFixed(1)}
 Games: ${Games}
 Goals: ${G}
 Assists: ${A}
 Points: ${Pts}
-PPP: ${PPP}
-ShotsPG: ${ShotsPG}
-HitsPG: ${HitsPG}
-BlocksPG: ${BlocksPG}`
+Powerplay Points: ${PPP}
+Shots per Game: ${ShotsPG}
+Hits per Game: ${HitsPG}
+Blocks per Game: ${BlocksPG}`
           );
           tooltip.setAttribute('position', `0 0.5 0`);
           tooltip.setAttribute('align', 'center');
