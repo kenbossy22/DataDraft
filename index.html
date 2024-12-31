@@ -6,30 +6,31 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   </head>
   <body>
-    <a-scene>
-      <!-- Sky for immersion -->
-      <a-sky color="#262626"></a-sky>
+    <a-scene background="color: #000">
+      <!-- Sky and Lighting -->
+      <a-sky color="#000"></a-sky>
+      <a-light type="directional" position="-1 2 1" intensity="0.8"></a-light>
 
-      <!-- Scatterplot Container -->
-      <a-entity id="scatterplot-container" position="0 1.6 -3" rotation="0 0 0" drag-rotate-component>
-        <!-- X-axis (Completeness Rating) -->
-        <a-entity line="start: -3 0 0; end: 3 0 0; color: red"></a-entity>
-        <a-text value="Completeness Rating" position="3 0 0" rotation="0 0 0"></a-text>
+      <!-- Axes -->
+      <a-entity id="axes">
+        <!-- X-Axis (Completeness Rating) -->
+        <a-entity line="start: 0 0 0; end: 5 0 0; color: red;"></a-entity>
+        <a-text value="Completeness Rating" color="red" position="6 0 0" rotation="0 0 0" scale="1.5 1.5 1.5"></a-text>
 
-        <!-- Y-axis (PtPG) -->
-        <a-entity line="start: 0 -3 0; end: 0 3 0; color: green"></a-entity>
-        <a-text value="PtPG" position="0 3 0" rotation="0 0 0"></a-text>
+        <!-- Y-Axis (PtPG - Height) -->
+        <a-entity line="start: 0 0 0; end: 0 5 0; color: blue;"></a-entity>
+        <a-text value="PtPG" color="blue" position="0 6 0" rotation="0 0 0" scale="1.5 1.5 1.5"></a-text>
 
-        <!-- Z-axis (Weighted Rating) -->
-        <a-entity line="start: 0 0 -3; end: 0 0 3; color: blue"></a-entity>
-        <a-text value="Weighted Rating" position="0 0 3" rotation="0 0 0"></a-text>
-
-        <!-- Scatterplot -->
-        <a-entity id="scatterplot"></a-entity>
+        <!-- Z-Axis (Weighted Rating - Depth) -->
+        <a-entity line="start: 0 0 0; end: 0 0 5; color: green;"></a-entity>
+        <a-text value="Weighted Rating" color="green" position="0 0 6" rotation="0 0 0" scale="1.5 1.5 1.5"></a-text>
       </a-entity>
 
-      <!-- Camera -->
-      <a-camera position="0 1.6 0" rotation="0 0 0">
+      <!-- Scatterplot Data Points -->
+      <a-entity id="scatterplot"></a-entity>
+
+      <!-- Camera and Controls -->
+      <a-camera position="0 2 8">
         <a-cursor></a-cursor>
       </a-camera>
     </a-scene>
@@ -41,28 +42,17 @@
         .then(data => {
           const scatterplot = document.getElementById('scatterplot');
 
-          function scale(value, min, max, scaledMin, scaledMax) {
-            return ((value - min) / (max - min)) * (scaledMax - scaledMin) + scaledMin;
-          }
-
-          // Set min/max for scaling (replace with actual values)
-          const xMin = 0, xMax = 100; // Completeness Rating
-          const yMin = 0, yMax = 2;   // PtPG
-          const zMin = 0, zMax = 100; // Weighted Rating
-
           data.forEach(point => {
-            const { 'Completeness Rating': x, 'PtPG': y, 'Weighted_Rating': z, 'Player Name': name } = point;
+            const { 'Completeness Rating': x, 'Weighted_Rating': z, PtPG: y, 'Player Name': name } = point;
 
-            const scaledX = scale(x, xMin, xMax, -5, 5);
-            const scaledY = scale(y, yMin, yMax, -5, 5);
-            const scaledZ = scale(z, zMin, zMax, -5, 5);
-
+            // Create a sphere for each data point
             const sphere = document.createElement('a-sphere');
-            sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
+            sphere.setAttribute('position', `${x} ${y} ${z}`);
             sphere.setAttribute('radius', 0.1);
-            sphere.setAttribute('color', `hsl(${240 - 240 * (y / yMax)}, 100%, 50%)`); // Color based on PtPG
-            sphere.setAttribute('hoverable', true);
-            sphere.setAttribute('tooltip', `Player: ${name}\nPtPG: ${y.toFixed(2)}`);
+            sphere.setAttribute('color', `#${Math.floor(Math.random()*16777215).toString(16)}`); // Random color
+
+            // Tooltip for hover interaction
+            sphere.setAttribute('tooltip', name);
 
             scatterplot.appendChild(sphere);
           });
