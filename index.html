@@ -25,31 +25,22 @@
     </a-entity>
 
     <!-- Data Points -->
-    <a-entity id="scatterplot" position="0 0 0" grab hoverable super-hands></a-entity>
+    <a-entity id="scatterplot" position="0 0 0"></a-entity>
 
     <!-- Camera -->
-    <a-camera position="0 5 20" wasd-controls="enabled: true" look-controls="enabled: false">
+    <a-camera position="0 5 20" wasd-controls look-controls gamepad-controls>
       <a-cursor></a-cursor>
     </a-camera>
 
     <!-- Right Controller with Laser -->
-    <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .hoverable">
-      <a-sphere position="0 0 -0.05" radius="0.02" color="white"></a-sphere>
-    </a-entity>
+    <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.5"></a-entity>
   </a-scene>
 
   <script>
     fetch('scatter_data.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
         const scatterplot = document.getElementById('scatterplot');
-        let lastHovered = null; // To track the last hovered sphere
-
         data.forEach(point => {
           const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name, Games, G, A, Pts, PPP, ShotsPG, HitsPG, BlocksPG } = point;
 
@@ -82,83 +73,52 @@ Shots per Game: ${ShotsPG}
 Hits per Game: ${HitsPG}
 Blocks per Game: ${BlocksPG}`
           );
-
-          // Position the tooltip slightly to the side of the sphere
-          tooltip.setAttribute('position', `0.5 0 0`); // Adjust X for horizontal offset
-          tooltip.setAttribute('align', 'left'); // Align text to the left
+          tooltip.setAttribute('position', `0.5 0 0`); // Position to the side of the sphere
+          tooltip.setAttribute('align', 'left');
           tooltip.setAttribute('scale', '0.5 0.5 0.5');
           tooltip.setAttribute('color', 'yellow');
           tooltip.setAttribute('visible', false);
           sphere.appendChild(tooltip);
 
-          // Show tooltip and hide others dynamically
-          sphere.addEventListener('mouseenter', () => {
-            if (lastHovered && lastHovered !== sphere) {
-              lastHovered.children[0].setAttribute('visible', false); // Hide the previous tooltip
-            }
-            tooltip.setAttribute('visible', true);
-            lastHovered = sphere; // Set the current sphere as the last hovered
-          });
-
-          sphere.addEventListener('mouseleave', () => {
-            tooltip.setAttribute('visible', false);
-            lastHovered = null; // Reset when leaving
-          });
+          // Add hover events
+          sphere.addEventListener('mouseenter', () => tooltip.setAttribute('visible', true));
+          sphere.addEventListener('mouseleave', () => tooltip.setAttribute('visible', false));
         });
       })
-      .catch(error => {
-        console.error('Error loading scatterplot data:', error);
-      });
+      .catch(error => console.error('Error loading scatterplot data:', error));
 
-    // Function to get color based on Points per Game
     function getColorFromMetric(ptpg) {
       if (ptpg < 0.75) return 'blue';
       if (ptpg <= 1.0) return 'yellow';
       return 'green';
     }
 
-    // Combine left joystick movement and right joystick camera rotation
+    // Joystick movement and camera controls
     document.addEventListener('gamepadconnected', () => {
       const camera = document.querySelector('a-camera').object3D;
 
       const updateControls = () => {
         const gamepads = navigator.getGamepads();
-        const gp = gamepads[0]; // Assuming Oculus controller is the first gamepad
+        const gp = gamepads[0];
 
         if (gp) {
-          // Left joystick: Movement
-          const moveX = gp.axes[0] * 0.2; // Left joystick horizontal (left/right)
-          const moveZ = gp.axes[1] * 0.2; // Left joystick vertical (forward/backward)
+          // Left joystick for movement
+          const moveX = gp.axes[0] * 0.2;
+          const moveZ = gp.axes[1] * 0.2;
           camera.position.x -= moveX;
           camera.position.z += moveZ;
 
-          // Right joystick: Rotation
-          const rotateY = gp.axes[2] * 0.05; // Right joystick horizontal (yaw)
-          const rotateX = gp.axes[3] * 0.05; // Right joystick vertical (pitch)
-          camera.rotation.y -= rotateY; // Rotate camera horizontally
-          camera.rotation.x -= rotateX; // Rotate camera vertically
-
-          camera.rotation.x = Math.max(Math.min(camera.rotation.x, Math.PI / 2), -Math.PI / 2); // Clamp vertical rotation
+          // Right joystick for rotation
+          const rotateY = gp.axes[2] * 0.05;
+          const rotateX = gp.axes[3] * 0.05;
+          camera.rotation.y -= rotateY;
+          camera.rotation.x -= rotateX;
         }
 
         requestAnimationFrame(updateControls);
       };
 
       updateControls();
-    });
-
-    // Add interaction logic for laser pointer
-    document.querySelector('#right-controller').addEventListener('raycaster-intersection', (evt) => {
-      const [intersectedEl] = evt.detail.intersectedEls; // Closest intersected element
-      if (intersectedEl && intersectedEl.classList.contains('hoverable')) {
-        intersectedEl.children[0].setAttribute('visible', true); // Show tooltip
-      }
-    });
-    document.querySelector('#right-controller').addEventListener('raycaster-intersection-cleared', (evt) => {
-      const [intersectedEl] = evt.detail.clearedEls;
-      if (intersectedEl && intersectedEl.classList.contains('hoverable')) {
-        intersectedEl.children[0].setAttribute('visible', false); // Hide tooltip
-      }
     });
   </script>
 </body>
