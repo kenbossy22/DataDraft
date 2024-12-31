@@ -1,91 +1,98 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>3D Scatterplot in VR</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-  </head>
-  <body>
-    <a-scene>
-      <!-- Sky -->
-      <a-sky color="#000"></a-sky>
+<head>
+  <title>3D Scatterplot in VR</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.0/dist/aframe-physics-system.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/super-hands"></script>
+</head>
+<body>
+  <a-scene>
+    <!-- Sky -->
+    <a-sky color="#000" radius="50"></a-sky>
 
-      <!-- Axes -->
-      <a-entity>
-        <!-- X-axis (Completeness Rating) -->
-        <a-box position="5 0 0" width="10" height="0.05" depth="0.05" color="red"></a-box>
-        <a-text value="Completeness Rating" position="10.5 0.2 0" rotation="0 0 0" color="red"></a-text>
+    <!-- Axes -->
+    <a-entity>
+      <a-box position="5 0 0" width="10" height="0.05" depth="0.05" color="red"></a-box>
+      <a-text value="Completeness Rating" position="10.5 0.2 0" rotation="0 0 0" color="red"></a-text>
 
-        <!-- Y-axis (PtPG) -->
-        <a-box position="0 5 0" width="0.05" height="10" depth="0.05" color="green"></a-box>
-        <a-text value="PtPG" position="0 10.5 0.2" rotation="0 0 0" color="green"></a-text>
+      <a-box position="0 5 0" width="0.05" height="10" depth="0.05" color="green"></a-box>
+      <a-text value="PtPG" position="0 10.5 0.2" rotation="0 0 0" color="green"></a-text>
 
-        <!-- Z-axis (Weighted Rating) -->
-        <a-box position="0 0 5" width="0.05" height="0.05" depth="10" color="blue"></a-box>
-        <a-text value="Weighted Rating" position="0.2 0 10.5" rotation="0 0 0" color="blue"></a-text>
-      </a-entity>
+      <a-box position="0 0 5" width="0.05" height="0.05" depth="10" color="blue"></a-box>
+      <a-text value="Weighted Rating" position="0.2 0 10.5" rotation="0 0 0" color="blue"></a-text>
+    </a-entity>
 
-      <!-- Data Points -->
-      <a-entity id="scatterplot"></a-entity>
+    <!-- Data Points -->
+    <a-entity id="scatterplot" position="0 0 0" grab></a-entity>
 
-      <!-- Camera -->
-      <a-camera position="0 5 20">
-        <a-cursor></a-cursor>
-      </a-camera>
-    </a-scene>
+    <!-- Camera -->
+    <a-camera position="0 5 20" wasd-controls="enabled: true">
+      <a-cursor></a-cursor>
+    </a-camera>
+  </a-scene>
 
-    <script>
-      // Color logic based on metrics
-      function getColorFromMetric(metric, isPtPG = false) {
-        if (isPtPG) {
-          if (metric <= 0.75) return 'blue';
-          else if (metric > 0.75 && metric <= 1.0) return 'yellow';
-          else return 'green';
-        } else {
-          if (metric <= 60) return 'blue';
-          else if (metric > 60 && metric <= 70) return 'yellow';
-          else return 'green';
+  <script>
+    fetch('scatter_data.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
         }
-      }
+        return response.json();
+      })
+      .then(data => {
+        const scatterplot = document.getElementById('scatterplot');
 
-      // Fetch the scatterplot data
-      fetch('scatter_data.json')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const scatterplot = document.getElementById('scatterplot');
+        data.forEach(point => {
+          const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name } = point;
 
-          data.forEach(point => {
-            const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name } = point;
+          const scaledX = x / 10;
+          const scaledY = y * 5;
+          const scaledZ = z / 10;
 
-            // Scale values for better VR visualization
-            const scaledX = x / 10; // Adjust scaling to separate points
-            const scaledY = y * 5; // Larger scaling for Y-axis
-            const scaledZ = z / 10; // Adjust scaling to separate points
+          const sphere = document.createElement('a-sphere');
+          sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
+          sphere.setAttribute('radius', 0.2);
+          sphere.setAttribute('color', getColorFromMetric(y));
+          scatterplot.appendChild(sphere);
 
-            // Create the data point
-            const sphere = document.createElement('a-sphere');
-            sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
-            sphere.setAttribute('radius', 0.2); // Smaller data points
-            sphere.setAttribute('color', getColorFromMetric(y, true));
-            scatterplot.appendChild(sphere);
+          const tooltip = document.createElement('a-text');
+          tooltip.setAttribute('value', 
+            `Player: ${name}
+Completeness Rating: ${x.toFixed(1)}
+Weighted Rating: ${z.toFixed(1)}
+PtPG: ${y.toFixed(1)}
+Games: ${point['Games']}
+Goals: ${point['G']}
+Assists: ${point['A']}
+Points: ${point['Pts']}
+PPP: ${point['PPP']}
+ShotsPG: ${point['ShotsPG']}
+HitsPG: ${point['HitsPG']}
+BlocksPG: ${point['BlocksPG']}`
+          );
+          tooltip.setAttribute('position', `${scaledX} ${scaledY + 0.5} ${scaledZ}`);
+          tooltip.setAttribute('color', 'white');
+          tooltip.setAttribute('align', 'center');
+          tooltip.setAttribute('scale', '1 1 1');
+          tooltip.setAttribute('visible', false);
+          scatterplot.appendChild(tooltip);
 
-            // Add hoverable label
-            const tooltip = document.createElement('a-text');
-            tooltip.setAttribute('value', `${name}\nPtPG: ${y.toFixed(2)}`);
-            tooltip.setAttribute('position', `${scaledX} ${scaledY + 0.5} ${scaledZ}`);
-            tooltip.setAttribute('color', 'white');
-            tooltip.setAttribute('scale', '0.5 0.5 0.5');
-            scatterplot.appendChild(tooltip);
-          });
-        })
-        .catch(error => {
-          console.error('Error loading scatterplot data:', error);
+          sphere.addEventListener('mouseenter', () => tooltip.setAttribute('visible', true));
+          sphere.addEventListener('mouseleave', () => tooltip.setAttribute('visible', false));
         });
-    </script>
-  </body>
+      })
+      .catch(error => {
+        console.error('Error loading scatterplot data:', error);
+      });
+
+    function getColorFromMetric(ptpg) {
+      if (ptpg < 0.75) return 'blue';
+      if (ptpg <= 1.0) return 'yellow';
+      return 'green';
+    }
+  </script>
+</body>
 </html>
+
