@@ -34,11 +34,9 @@
       <a-camera wasd-controls-enabled="false">
         <a-cursor color="yellow"></a-cursor>
       </a-camera>
+      <!-- Attach the right controller to the camera rig -->
+      <a-entity id="rightController" laser-controls="hand: right" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75"></a-entity>
     </a-entity>
-
-    <!-- VR Controllers -->
-    <a-entity id="leftController" tracked-controls="controller: 0; hand: left"></a-entity>
-    <a-entity id="rightController" laser-controls="hand: right" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75"></a-entity>
   </a-scene>
 
   <script>
@@ -90,7 +88,7 @@ Shots per Game: ${shotsPG}
 Hits per Game: ${hitsPG}
 Blocks per Game: ${blocksPG}`
           );
-          tooltip.setAttribute('position', `0 0.5 0`);
+          tooltip.setAttribute('position', `0 1 0`); // Position above the sphere
           tooltip.setAttribute('align', 'center');
           tooltip.setAttribute('scale', '0.5 0.5 0.5');
           tooltip.setAttribute('color', 'yellow');
@@ -114,6 +112,35 @@ Blocks per Game: ${blocksPG}`
       if (ptpg <= 1.0) return 'yellow';
       return 'green';
     }
+
+    // Add right joystick pitch and yaw controls
+    document.addEventListener('gamepadconnected', () => {
+      const cameraRig = document.getElementById('cameraRig').object3D;
+
+      const updateControls = () => {
+        const gamepads = navigator.getGamepads();
+        const gp = gamepads[0]; // Assuming Oculus controller is the first gamepad
+
+        if (gp) {
+          // Left joystick: Movement
+          const moveX = gp.axes[0] * 0.2; // Horizontal (left/right)
+          const moveZ = gp.axes[1] * 0.2; // Vertical (forward/backward)
+          cameraRig.position.x -= moveX;
+          cameraRig.position.z += moveZ;
+
+          // Right joystick: Rotation (pitch and yaw)
+          const rotateY = gp.axes[2] * 0.05; // Horizontal (yaw)
+          const rotateX = gp.axes[3] * 0.05; // Vertical (pitch)
+          cameraRig.rotation.y -= rotateY; // Yaw rotation
+          cameraRig.rotation.x -= rotateX; // Pitch rotation
+          cameraRig.rotation.x = Math.max(Math.min(cameraRig.rotation.x, Math.PI / 2), -Math.PI / 2); // Clamp pitch
+        }
+
+        requestAnimationFrame(updateControls);
+      };
+
+      updateControls();
+    });
   </script>
 </body>
 </html>
