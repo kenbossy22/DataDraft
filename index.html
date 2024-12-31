@@ -5,7 +5,6 @@
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.0/dist/aframe-physics-system.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/super-hands"></script>
 </head>
 <body>
   <a-scene physics>
@@ -48,12 +47,7 @@
 
   <script>
     fetch('scatter_data.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
         const scatterplot = document.getElementById('scatterplot');
 
@@ -73,20 +67,17 @@
             "BlocksPG": blocksPG
           } = point;
 
-          // Adjust the scale for better visualization
           const scaledX = x / 10;
           const scaledY = y * 5;
           const scaledZ = z / 10;
 
-          // Create datapoint sphere
           const sphere = document.createElement('a-sphere');
           sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
           sphere.setAttribute('radius', 0.2);
           sphere.setAttribute('color', getColorFromMetric(y));
-          sphere.setAttribute('class', 'hoverable'); // Enable raycasting interactions
+          sphere.setAttribute('class', 'hoverable');
           scatterplot.appendChild(sphere);
 
-          // Create tooltip for the datapoint
           const tooltip = document.createElement('a-text');
           tooltip.setAttribute(
             'value',
@@ -110,18 +101,22 @@ Blocks per Game: ${blocksPG}`
           tooltip.setAttribute('visible', false);
           sphere.appendChild(tooltip);
 
-          // Show tooltip on raycast hover
           sphere.addEventListener('raycaster-intersected', () => {
             tooltip.setAttribute('visible', true);
+
+            const camera = document.querySelector('a-camera').object3D;
+            const spherePosition = sphere.object3D.getWorldPosition(new THREE.Vector3());
+            const direction = camera.position.clone().sub(spherePosition).normalize();
+            const rotation = Math.atan2(direction.x, direction.z) * (180 / Math.PI);
+            tooltip.setAttribute('rotation', `0 ${rotation} 0`);
           });
+
           sphere.addEventListener('raycaster-intersected-cleared', () => {
             tooltip.setAttribute('visible', false);
           });
         });
       })
-      .catch(error => {
-        console.error('Error loading scatterplot data:', error);
-      });
+      .catch(error => console.error('Error loading scatterplot data:', error));
 
     function getColorFromMetric(ptpg) {
       if (ptpg < 0.75) return 'blue';
@@ -131,4 +126,3 @@ Blocks per Game: ${blocksPG}`
   </script>
 </body>
 </html>
-
