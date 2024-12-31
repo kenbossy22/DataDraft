@@ -33,7 +33,7 @@
     <!-- Camera Rig -->
     <a-entity id="cameraRig" position="0 1.6 10" movement-controls="fly: true">
       <a-camera wasd-controls-enabled="false">
-        <!-- Removed a-cursor to disable eye/headset tracking -->
+        <!-- Headset cursor disabled by removing a-cursor -->
       </a-camera>
       <!-- Left Controller -->
       <a-entity
@@ -103,7 +103,7 @@ Shots per Game: ${shotsPG}
 Hits per Game: ${hitsPG}
 Blocks per Game: ${blocksPG}`
           );
-          tooltip.setAttribute('position', `0.5 0 0.5`); // Position to the side
+          tooltip.setAttribute('position', `0.5 0.5 0.5`); // Positioned to the side
           tooltip.setAttribute('align', 'center');
           tooltip.setAttribute('scale', '0.5 0.5 0.5');
           tooltip.setAttribute('color', 'yellow');
@@ -113,12 +113,6 @@ Blocks per Game: ${blocksPG}`
           // Tooltip Interaction
           sphere.addEventListener('raycaster-intersected', () => {
             tooltip.setAttribute('visible', true);
-            const camera = document.querySelector('a-camera');
-            const cameraPosition = camera.object3D.position;
-            const spherePosition = sphere.object3D.position;
-            const direction = cameraPosition.clone().sub(spherePosition).normalize();
-            const rotation = Math.atan2(direction.x, direction.z) * (180 / Math.PI);
-            tooltip.setAttribute('rotation', `0 ${rotation} 0`);
           });
 
           sphere.addEventListener('raycaster-intersected-cleared', () => {
