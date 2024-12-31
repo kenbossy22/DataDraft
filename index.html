@@ -6,57 +6,64 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   </head>
   <body>
-    <a-scene background="color: #000">
-      <!-- Sky and Lighting -->
+    <a-scene>
+      <!-- Background -->
       <a-sky color="#000"></a-sky>
-      <a-light type="directional" position="-1 2 1" intensity="0.8"></a-light>
 
       <!-- Axes -->
-      <a-entity id="axes">
-        <!-- X-Axis (Completeness Rating) -->
-        <a-entity line="start: 0 0 0; end: 5 0 0; color: red;"></a-entity>
-        <a-text value="Completeness Rating" color="red" position="6 0 0" rotation="0 0 0" scale="1.5 1.5 1.5"></a-text>
+      <a-entity>
+        <!-- X-axis (Completeness Rating) -->
+        <a-box position="0 0 0" width="10" height="0.05" depth="0.05" color="red"></a-box>
+        <a-text value="Completeness Rating" position="10 0 0.5" rotation="0 0 0" color="red"></a-text>
 
-        <!-- Y-Axis (PtPG - Height) -->
-        <a-entity line="start: 0 0 0; end: 0 5 0; color: blue;"></a-entity>
-        <a-text value="PtPG" color="blue" position="0 6 0" rotation="0 0 0" scale="1.5 1.5 1.5"></a-text>
+        <!-- Y-axis (PtPG) -->
+        <a-box position="0 0 0" width="0.05" height="10" depth="0.05" color="green"></a-box>
+        <a-text value="PtPG" position="0 10 0.5" rotation="0 0 0" color="green"></a-text>
 
-        <!-- Z-Axis (Weighted Rating - Depth) -->
-        <a-entity line="start: 0 0 0; end: 0 0 5; color: green;"></a-entity>
-        <a-text value="Weighted Rating" color="green" position="0 0 6" rotation="0 0 0" scale="1.5 1.5 1.5"></a-text>
+        <!-- Z-axis (Weighted Rating) -->
+        <a-box position="0 0 0" width="0.05" height="0.05" depth="10" color="blue"></a-box>
+        <a-text value="Weighted Rating" position="0 0 10.5" rotation="0 0 0" color="blue"></a-text>
       </a-entity>
 
-      <!-- Scatterplot Data Points -->
+      <!-- Data Points -->
       <a-entity id="scatterplot"></a-entity>
 
-      <!-- Camera and Controls -->
-      <a-camera position="0 2 12">
+      <!-- Camera -->
+      <a-camera position="0 5 15">
         <a-cursor></a-cursor>
       </a-camera>
     </a-scene>
 
     <script>
-      // Load scatterplot data
-      fetch('scatter_data.json')
-        .then(response => response.json())
-        .then(data => {
-          const scatterplot = document.getElementById('scatterplot');
+      // Mock Data
+      const data = [
+        { 'Completeness Rating': 1, 'Weighted_Rating': 2, PtPG: 3, 'Player Name': 'Player 1' },
+        { 'Completeness Rating': 4, 'Weighted_Rating': 5, PtPG: 6, 'Player Name': 'Player 2' },
+        { 'Completeness Rating': 7, 'Weighted_Rating': 8, PtPG: 9, 'Player Name': 'Player 3' }
+      ];
 
-          data.forEach(point => {
-            const { 'Completeness Rating': x, 'Weighted_Rating': z, PtPG: y, 'Player Name': name } = point;
+      const scatterplot = document.getElementById('scatterplot');
 
-            // Create a sphere for each data point
-            const sphere = document.createElement('a-sphere');
-            sphere.setAttribute('position', `${x} ${y} ${z}`);
-            sphere.setAttribute('radius', 0.1);
-            sphere.setAttribute('color', `#${Math.floor(Math.random()*16777215).toString(16)}`); // Random color
+      data.forEach(point => {
+        const { 'Completeness Rating': x, 'Weighted_Rating': z, PtPG: y, 'Player Name': name } = point;
 
-            // Tooltip for hover interaction
-            sphere.setAttribute('tooltip', name);
+        // Create sphere for each data point
+        const sphere = document.createElement('a-sphere');
+        sphere.setAttribute('position', `${x * 2} ${y * 2} ${z * 2}`);
+        sphere.setAttribute('radius', 0.2);
+        sphere.setAttribute('color', '#FF5733');
+        sphere.setAttribute('hoverable', true);
 
-            scatterplot.appendChild(sphere);
-          });
-        });
+        // Add hover label
+        const tooltip = document.createElement('a-text');
+        tooltip.setAttribute('value', name);
+        tooltip.setAttribute('position', `${x * 2} ${y * 2 + 0.5} ${z * 2}`);
+        tooltip.setAttribute('color', 'white');
+        tooltip.setAttribute('scale', '1 1 1');
+        scatterplot.appendChild(tooltip);
+
+        scatterplot.appendChild(sphere);
+      });
     </script>
   </body>
 </html>
