@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>3D Scatterplot in VR</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Add a sky for immersion -->
+      <a-sky color="#000"></a-sky>
+
+      <!-- Load scatterplot data -->
+      <a-entity id="scatterplot"></a-entity>
+
+      <!-- Camera and Controls -->
+      <a-camera position="0 1.6 3">
+        <a-cursor></a-cursor>
+      </a-camera>
+    </a-scene>
+
+    <script>
+      // Load scatterplot data
+      fetch('scatter_data.json')
+        .then(response => response.json())
+        .then(data => {
+          const scatterplot = document.getElementById('scatterplot');
+
+          data.forEach(point => {
+            const { 'Completeness Rating': x, 'Weighted_Rating': y, PtPG: z, 'Player Name': name } = point;
+
+            // Create a sphere for each data point
+            const sphere = document.createElement('a-sphere');
+            sphere.setAttribute('position', `${x} ${y} ${z}`);
+            sphere.setAttribute('radius', 0.1);
+            sphere.setAttribute('color', 'blue');
+            sphere.setAttribute('hoverable', true);
+
+            // Add hover text
+            sphere.setAttribute('tooltip', name);
+
+            scatterplot.appendChild(sphere);
+          });
+        });
+    </script>
+  </body>
+</html>
