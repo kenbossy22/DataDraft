@@ -3,9 +3,6 @@
 <head>
   <title>3D Scatterplot in VR</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.0/dist/aframe-physics-system.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/super-hands"></script>
 </head>
 <body>
   <a-scene>
@@ -28,98 +25,62 @@
     <a-entity id="scatterplot" position="0 0 0"></a-entity>
 
     <!-- Camera -->
-    <a-camera position="0 5 20" wasd-controls look-controls gamepad-controls>
+    <a-camera position="0 5 20" wasd-controls="enabled: true" look-controls>
       <a-cursor></a-cursor>
     </a-camera>
 
-    <!-- Right Controller with Laser -->
-    <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.5"></a-entity>
+    <!-- Controllers -->
+    <a-entity id="left-controller" hand-controls="hand: left" oculus-touch-controls>
+      <a-text id="left-controller-info" position="0 0.5 -0.5" align="center" color="yellow" scale="0.5 0.5 0.5"></a-text>
+    </a-entity>
+    <a-entity id="right-controller" hand-controls="hand: right" oculus-touch-controls>
+      <a-text id="right-controller-info" position="0 0.5 -0.5" align="center" color="yellow" scale="0.5 0.5 0.5"></a-text>
+    </a-entity>
   </a-scene>
 
   <script>
-    fetch('scatter_data.json')
-      .then(response => response.json())
-      .then(data => {
-        const scatterplot = document.getElementById('scatterplot');
-        data.forEach(point => {
-          const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name, Games, G, A, Pts, PPP, ShotsPG, HitsPG, BlocksPG } = point;
+    const leftController = document.getElementById('left-controller');
+    const rightController = document.getElementById('right-controller');
+    const leftInfo = document.getElementById('left-controller-info');
+    const rightInfo = document.getElementById('right-controller-info');
 
-          // Adjust the scale for better visualization
-          const scaledX = x / 10;
-          const scaledY = y * 5;
-          const scaledZ = z / 10;
+    function updateControllerInfo() {
+      // Get the state of connected controllers
+      const gamepads = navigator.getGamepads();
 
-          // Create datapoint sphere
-          const sphere = document.createElement('a-sphere');
-          sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
-          sphere.setAttribute('radius', 0.2);
-          sphere.setAttribute('color', getColorFromMetric(y));
-          sphere.setAttribute('class', 'hoverable'); // Make it raycastable
-          scatterplot.appendChild(sphere);
+      if (gamepads) {
+        const leftGamepad = gamepads.find(gp => gp && gp.hand === 'left');
+        const rightGamepad = gamepads.find(gp => gp && gp.hand === 'right');
 
-          // Create tooltip for the datapoint
-          const tooltip = document.createElement('a-text');
-          tooltip.setAttribute('value', 
-            `Player: ${name}
-Completeness Rating: ${x.toFixed(1)}
-Weighted Rating: ${z.toFixed(1)}
-Points per Game (PtPG): ${y.toFixed(1)}
-Games: ${Games}
-Goals: ${G}
-Assists: ${A}
-Points: ${Pts}
-Powerplay Points: ${PPP}
-Shots per Game: ${ShotsPG}
-Hits per Game: ${HitsPG}
-Blocks per Game: ${BlocksPG}`
+        if (leftGamepad) {
+          leftInfo.setAttribute('value',
+            `Left Controller:
+Joystick X: ${leftGamepad.axes[0].toFixed(2)}
+Joystick Y: ${leftGamepad.axes[1].toFixed(2)}
+[Y] Button: ${leftGamepad.buttons[4].pressed}
+[X] Button: ${leftGamepad.buttons[3].pressed}
+Trigger: ${leftGamepad.buttons[0].pressed}
+Grip: ${leftGamepad.buttons[1].pressed}`
           );
-          tooltip.setAttribute('position', `0.5 0 0`); // Position to the side of the sphere
-          tooltip.setAttribute('align', 'left');
-          tooltip.setAttribute('scale', '0.5 0.5 0.5');
-          tooltip.setAttribute('color', 'yellow');
-          tooltip.setAttribute('visible', false);
-          sphere.appendChild(tooltip);
-
-          // Add hover events
-          sphere.addEventListener('mouseenter', () => tooltip.setAttribute('visible', true));
-          sphere.addEventListener('mouseleave', () => tooltip.setAttribute('visible', false));
-        });
-      })
-      .catch(error => console.error('Error loading scatterplot data:', error));
-
-    function getColorFromMetric(ptpg) {
-      if (ptpg < 0.75) return 'blue';
-      if (ptpg <= 1.0) return 'yellow';
-      return 'green';
-    }
-
-    // Joystick movement and camera controls
-    document.addEventListener('gamepadconnected', () => {
-      const camera = document.querySelector('a-camera').object3D;
-
-      const updateControls = () => {
-        const gamepads = navigator.getGamepads();
-        const gp = gamepads[0];
-
-        if (gp) {
-          // Left joystick for movement
-          const moveX = gp.axes[0] * 0.2;
-          const moveZ = gp.axes[1] * 0.2;
-          camera.position.x -= moveX;
-          camera.position.z += moveZ;
-
-          // Right joystick for rotation
-          const rotateY = gp.axes[2] * 0.05;
-          const rotateX = gp.axes[3] * 0.05;
-          camera.rotation.y -= rotateY;
-          camera.rotation.x -= rotateX;
         }
 
-        requestAnimationFrame(updateControls);
-      };
+        if (rightGamepad) {
+          rightInfo.setAttribute('value',
+            `Right Controller:
+Joystick X: ${rightGamepad.axes[2].toFixed(2)}
+Joystick Y: ${rightGamepad.axes[3].toFixed(2)}
+[B] Button: ${rightGamepad.buttons[1].pressed}
+[A] Button: ${rightGamepad.buttons[0].pressed}
+Trigger: ${rightGamepad.buttons[0].pressed}
+Grip: ${rightGamepad.buttons[1].pressed}`
+          );
+        }
+      }
 
-      updateControls();
-    });
+      requestAnimationFrame(updateControllerInfo);
+    }
+
+    updateControllerInfo();
   </script>
 </body>
 </html>
