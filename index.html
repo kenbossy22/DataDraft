@@ -42,8 +42,7 @@
       laser-controls="hand: left"
       raycaster="objects: .hoverable"
       line="color: cyan; opacity: 0.75"
-      position="-0.2 1.6 -0.5"
-      parent="cameraRig">
+      position="-0.2 1.6 -0.5">
     </a-entity>
 
     <!-- Right Controller -->
@@ -53,8 +52,7 @@
       laser-controls="hand: right"
       raycaster="objects: .hoverable"
       line="color: yellow; opacity: 0.75"
-      position="0.2 1.6 -0.5"
-      parent="cameraRig">
+      position="0.2 1.6 -0.5">
     </a-entity>
   </a-scene>
 
@@ -133,29 +131,29 @@ Blocks per Game: ${blocksPG}`
       return 'green';
     }
 
-    // Custom joystick handling
+    // Custom Joystick handling for Camera Rig
     document.addEventListener('gamepadconnected', () => {
       const cameraRig = document.getElementById('cameraRig').object3D;
 
       const updateControls = () => {
         const gamepads = navigator.getGamepads();
-        const gp = gamepads[0]; // Assuming the first gamepad is the one in use
+        const gp = gamepads[0]; // Assuming the first gamepad is in use
 
         if (gp) {
           // Left joystick: Movement
-          const moveX = gp.axes[0] * 0.2; // Strafe left/right
-          const moveZ = gp.axes[1] * 0.2; // Forward/backward
+          const moveX = gp.axes[0] * 0.2; // Horizontal movement
+          const moveZ = gp.axes[1] * 0.2; // Forward/backward movement
           cameraRig.position.x -= moveX;
           cameraRig.position.z += moveZ;
 
           // Right joystick: Rotation
           const rotateY = gp.axes[2] * 0.05; // Yaw (left/right rotation)
           const rotateX = gp.axes[3] * 0.05; // Pitch (up/down rotation)
-          cameraRig.rotation.y -= rotateY;
-          cameraRig.rotation.x = Math.max(
-            Math.min(cameraRig.rotation.x - rotateX, Math.PI / 2),
-            -Math.PI / 2
-          ); // Clamp pitch rotation
+          cameraRig.rotation.y -= rotateY; // Rotate yaw (y-axis)
+          cameraRig.rotation.x -= rotateX; // Rotate pitch (x-axis)
+
+          // Clamp pitch
+          cameraRig.rotation.x = Math.max(Math.min(cameraRig.rotation.x, Math.PI / 2), -Math.PI / 2);
         }
 
         requestAnimationFrame(updateControls);
