@@ -49,19 +49,20 @@
         const scatterplot = document.getElementById('scatterplot');
 
         data.forEach(point => {
-          const { 
-            'Completeness Rating': x, 
-            'Weighted_Rating': z, 
-            'PtPG': y, 
-            'Player Name': name, 
-            'Games', 
-            'G', 
-            'A', 
-            'Pts', 
-            'PPP', 
-            'ShotsPG', 
-            'HitsPG', 
-            'BlocksPG' 
+          // Destructure the JSON object with exact key names
+          const {
+            "Completeness Rating": x,
+            "Weighted_Rating": z,
+            "PtPG": y,
+            "Player Name": name,
+            "Games": games,
+            "G": goals,
+            "A": assists,
+            "Pts": points,
+            "PPP": ppp,
+            "ShotsPG": shotsPG,
+            "HitsPG": hitsPG,
+            "BlocksPG": blocksPG
           } = point;
 
           // Adjust the scale for better visualization
@@ -79,19 +80,20 @@
 
           // Create tooltip for the datapoint
           const tooltip = document.createElement('a-text');
-          tooltip.setAttribute('value', 
+          tooltip.setAttribute(
+            'value',
             `Player: ${name}
 Completeness Rating: ${x.toFixed(1)}
 Weighted Rating: ${z.toFixed(1)}
-Points per Game (PtPG): ${y.toFixed(1)}
-Games: ${Games}
-Goals: ${G}
-Assists: ${A}
-Points: ${Pts}
-Powerplay Points: ${PPP}
-Shots per Game: ${ShotsPG}
-Hits per Game: ${HitsPG}
-Blocks per Game: ${BlocksPG}`
+Points per Game (PtPG): ${y.toFixed(2)}
+Games: ${games}
+Goals: ${goals}
+Assists: ${assists}
+Points: ${points}
+Powerplay Points: ${ppp}
+Shots per Game: ${shotsPG}
+Hits per Game: ${hitsPG}
+Blocks per Game: ${blocksPG}`
           );
           tooltip.setAttribute('position', `0 0.5 0`);
           tooltip.setAttribute('align', 'center');
@@ -106,12 +108,18 @@ Blocks per Game: ${BlocksPG}`
             const camera = document.querySelector('a-camera');
             const cameraPosition = camera.object3D.position;
             const spherePosition = sphere.object3D.position;
-            const direction = cameraPosition.clone().sub(spherePosition).normalize();
-            const rotation = Math.atan2(direction.x, direction.z) * (180 / Math.PI);
+            const direction = cameraPosition
+              .clone()
+              .sub(spherePosition)
+              .normalize();
+            const rotation =
+              Math.atan2(direction.x, direction.z) * (180 / Math.PI);
             tooltip.setAttribute('rotation', `0 ${rotation} 0`);
           });
 
-          sphere.addEventListener('mouseleave', () => tooltip.setAttribute('visible', false));
+          sphere.addEventListener('mouseleave', () =>
+            tooltip.setAttribute('visible', false)
+          );
         });
       })
       .catch(error => {
