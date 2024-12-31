@@ -7,22 +7,22 @@
   </head>
   <body>
     <a-scene>
-      <!-- Background -->
+      <!-- Sky -->
       <a-sky color="#000"></a-sky>
 
       <!-- Axes -->
       <a-entity>
         <!-- X-axis (Completeness Rating) -->
-        <a-box position="0 0 0" width="10" height="0.05" depth="0.05" color="red"></a-box>
-        <a-text value="Completeness Rating" position="11 0 0.5" rotation="0 0 0" color="red"></a-text>
+        <a-box position="5 0 0" width="10" height="0.05" depth="0.05" color="red"></a-box>
+        <a-text value="Completeness Rating" position="10.5 0.2 0" rotation="0 0 0" color="red"></a-text>
 
         <!-- Y-axis (PtPG) -->
-        <a-box position="0 0 0" width="0.05" height="10" depth="0.05" color="green"></a-box>
-        <a-text value="PtPG" position="0 11 0.5" rotation="0 0 0" color="green"></a-text>
+        <a-box position="0 5 0" width="0.05" height="10" depth="0.05" color="green"></a-box>
+        <a-text value="PtPG" position="0 10.5 0.2" rotation="0 0 0" color="green"></a-text>
 
         <!-- Z-axis (Weighted Rating) -->
-        <a-box position="0 0 0" width="0.05" height="0.05" depth="10" color="blue"></a-box>
-        <a-text value="Weighted Rating" position="0 0 11" rotation="0 0 0" color="blue"></a-text>
+        <a-box position="0 0 5" width="0.05" height="0.05" depth="10" color="blue"></a-box>
+        <a-text value="Weighted Rating" position="0.2 0 10.5" rotation="0 0 0" color="blue"></a-text>
       </a-entity>
 
       <!-- Data Points -->
@@ -35,40 +35,43 @@
     </a-scene>
 
     <script>
-      // Fetch actual data from scatter_data.json
+      // Fetch the scatterplot data
       fetch('scatter_data.json')
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+          }
+          return response.json();
+        })
         .then(data => {
           const scatterplot = document.getElementById('scatterplot');
 
           data.forEach(point => {
             const { 'Completeness Rating': x, 'Weighted_Rating': z, PtPG: y, 'Player Name': name } = point;
 
-            // Scale values for better visibility in 3D space
-            const scaledX = x * 2;
-            const scaledY = y * 2; // PtPG properly mapped as height
-            const scaledZ = z * 2;
+            // Scale values for better VR visualization
+            const scaledX = x / 10; // Adjust scaling as needed
+            const scaledY = y * 2;
+            const scaledZ = z / 10;
 
-            // Create sphere for each data point
+            // Create the data point
             const sphere = document.createElement('a-sphere');
             sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
             sphere.setAttribute('radius', 0.3);
             sphere.setAttribute('color', '#FF5733');
-            sphere.setAttribute('hoverable', true);
+            scatterplot.appendChild(sphere);
 
-            // Add hover label
+            // Add hoverable label
             const tooltip = document.createElement('a-text');
             tooltip.setAttribute('value', `${name}\nPtPG: ${y.toFixed(2)}`);
             tooltip.setAttribute('position', `${scaledX} ${scaledY + 0.5} ${scaledZ}`);
             tooltip.setAttribute('color', 'white');
             tooltip.setAttribute('scale', '1 1 1');
             scatterplot.appendChild(tooltip);
-
-            scatterplot.appendChild(sphere);
           });
         })
         .catch(error => {
-          console.error("Error loading scatter_data.json:", error);
+          console.error('Error loading scatterplot data:', error);
         });
     </script>
   </body>
