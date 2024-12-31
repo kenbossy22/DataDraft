@@ -144,11 +144,11 @@ Blocks per Game: ${blocksPG}`
           cameraRig.position.x -= moveX;
           cameraRig.position.z += moveZ;
 
-          // Right joystick: Orientation
-          const yaw = gp.axes[2] * 0.05; // Yaw (left/right rotation)
-          const pitch = gp.axes[3] * 0.05; // Pitch (up/down rotation)
-          cameraRig.rotation.y -= yaw; // Rotate yaw (y-axis)
-          cameraRig.rotation.x -= pitch; // Rotate pitch (x-axis)
+          // Right joystick: Rotation
+          const rotateY = gp.axes[2] * 0.05; // Yaw (left/right rotation)
+          const rotateX = gp.axes[3] * 0.05; // Pitch (up/down rotation)
+          cameraRig.rotation.y -= rotateY; // Rotate yaw (y-axis)
+          cameraRig.rotation.x -= rotateX; // Rotate pitch (x-axis)
 
           // Clamp pitch to prevent flipping
           cameraRig.rotation.x = Math.max(Math.min(cameraRig.rotation.x, Math.PI / 2), -Math.PI / 2);
