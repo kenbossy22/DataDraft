@@ -63,9 +63,9 @@
             const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name } = point;
 
             // Scale values for better VR visualization
-            const scaledX = x / 5; // Adjust scaling to separate points
-            const scaledY = y * 10; // Larger scaling for Y-axis
-            const scaledZ = z / 5; // Adjust scaling to separate points
+            const scaledX = x / 10; // Adjust scaling to separate points
+            const scaledY = y * 5; // Larger scaling for Y-axis
+            const scaledZ = z / 10; // Adjust scaling to separate points
 
             // Create the data point
             const sphere = document.createElement('a-sphere');
