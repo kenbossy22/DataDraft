@@ -25,12 +25,16 @@
     </a-entity>
 
     <!-- Data Points -->
-    <a-entity id="scatterplot" position="0 0 0" grab></a-entity>
+    <a-entity id="scatterplot" position="0 0 0" grab hoverable super-hands></a-entity>
 
     <!-- Camera -->
-    <a-camera position="0 5 20" wasd-controls="enabled: true">
+    <a-camera position="0 5 20" wasd-controls="enabled: true" look-controls>
       <a-cursor></a-cursor>
     </a-camera>
+
+    <!-- Hand Controllers -->
+    <a-entity hand-controls="hand: left; handModelStyle: lowPoly; color: #ffcccc"></a-entity>
+    <a-entity hand-controls="hand: right; handModelStyle: lowPoly; color: #ccccff"></a-entity>
   </a-scene>
 
   <script>
@@ -47,16 +51,20 @@
         data.forEach(point => {
           const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name } = point;
 
+          // Adjust the scale for better visualization
           const scaledX = x / 10;
           const scaledY = y * 5;
           const scaledZ = z / 10;
 
+          // Create datapoint sphere
           const sphere = document.createElement('a-sphere');
           sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
           sphere.setAttribute('radius', 0.2);
           sphere.setAttribute('color', getColorFromMetric(y));
+          sphere.setAttribute('hoverable', true); // Allows hover interactions
           scatterplot.appendChild(sphere);
 
+          // Create tooltip for the datapoint
           const tooltip = document.createElement('a-text');
           tooltip.setAttribute('value', 
             `Player: ${name}
@@ -72,13 +80,14 @@ ShotsPG: ${point['ShotsPG']}
 HitsPG: ${point['HitsPG']}
 BlocksPG: ${point['BlocksPG']}`
           );
-          tooltip.setAttribute('position', `${scaledX} ${scaledY + 0.5} ${scaledZ}`);
-          tooltip.setAttribute('color', 'white');
+          tooltip.setAttribute('position', `0 0.5 0`);
           tooltip.setAttribute('align', 'center');
-          tooltip.setAttribute('scale', '1 1 1');
+          tooltip.setAttribute('scale', '0.5 0.5 0.5');
+          tooltip.setAttribute('color', 'yellow');
           tooltip.setAttribute('visible', false);
-          scatterplot.appendChild(tooltip);
+          sphere.appendChild(tooltip);
 
+          // Show tooltip on hover
           sphere.addEventListener('mouseenter', () => tooltip.setAttribute('visible', true));
           sphere.addEventListener('mouseleave', () => tooltip.setAttribute('visible', false));
         });
@@ -95,4 +104,3 @@ BlocksPG: ${point['BlocksPG']}`
   </script>
 </body>
 </html>
-
