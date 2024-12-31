@@ -28,7 +28,7 @@
     <a-entity id="scatterplot" position="0 0 0" grab hoverable super-hands></a-entity>
 
     <!-- Camera -->
-    <a-camera position="0 5 20" wasd-controls="enabled: true" look-controls>
+    <a-camera position="0 5 20" wasd-controls="enabled: true" look-controls="enabled: false">
       <a-cursor></a-cursor>
     </a-camera>
 
@@ -36,7 +36,6 @@
     <a-entity id="right-controller" laser-controls="hand: right" raycaster="objects: .hoverable">
       <a-sphere position="0 0 -0.05" radius="0.02" color="white"></a-sphere>
     </a-entity>
-
   </a-scene>
 
   <script>
@@ -118,29 +117,34 @@ Blocks per Game: ${BlocksPG}`
       return 'green';
     }
 
-    // Add right joystick rotation functionality
+    // Combine left joystick movement and right joystick camera rotation
     document.addEventListener('gamepadconnected', () => {
       const camera = document.querySelector('a-camera').object3D;
 
-      const updateRotation = () => {
+      const updateControls = () => {
         const gamepads = navigator.getGamepads();
-        const gp = gamepads[0]; // Assuming the right controller is the first gamepad
+        const gp = gamepads[0]; // Assuming Oculus controller is the first gamepad
 
         if (gp) {
-          // Right joystick axes: axes[2] = horizontal, axes[3] = vertical
-          const horizontal = gp.axes[2] * 0.05; // Adjust sensitivity
-          const vertical = gp.axes[3] * 0.05;
+          // Left joystick: Movement
+          const moveX = gp.axes[0] * 0.2; // Left joystick horizontal (left/right)
+          const moveZ = gp.axes[1] * 0.2; // Left joystick vertical (forward/backward)
+          camera.position.x -= moveX;
+          camera.position.z += moveZ;
 
-          camera.rotation.y -= horizontal; // Rotate camera horizontally
-          camera.rotation.x -= vertical; // Rotate camera vertically
+          // Right joystick: Rotation
+          const rotateY = gp.axes[2] * 0.05; // Right joystick horizontal (yaw)
+          const rotateX = gp.axes[3] * 0.05; // Right joystick vertical (pitch)
+          camera.rotation.y -= rotateY; // Rotate camera horizontally
+          camera.rotation.x -= rotateX; // Rotate camera vertically
 
           camera.rotation.x = Math.max(Math.min(camera.rotation.x, Math.PI / 2), -Math.PI / 2); // Clamp vertical rotation
         }
 
-        requestAnimationFrame(updateRotation);
+        requestAnimationFrame(updateControls);
       };
 
-      updateRotation();
+      updateControls();
     });
 
     // Add interaction logic for laser pointer
