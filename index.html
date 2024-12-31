@@ -32,18 +32,13 @@
 
     <!-- Camera Rig -->
     <a-entity id="cameraRig" position="0 1.6 10" movement-controls="fly: true">
-      <a-camera wasd-controls-enabled="false">
-        <!-- Headset cursor disabled by removing a-cursor -->
-      </a-camera>
-      <!-- Left Controller -->
+      <a-camera wasd-controls-enabled="false"></a-camera>
+      <!-- Left Controller (No Laser Pointer) -->
       <a-entity
         id="leftController"
-        hand-controls="hand: left"
-        laser-controls="hand: left"
-        raycaster="objects: .hoverable"
-        line="color: cyan; opacity: 0.75">
+        hand-controls="hand: left">
       </a-entity>
-      <!-- Right Controller -->
+      <!-- Right Controller with Laser Pointer -->
       <a-entity
         id="rightController"
         hand-controls="hand: right"
@@ -103,7 +98,7 @@ Shots per Game: ${shotsPG}
 Hits per Game: ${hitsPG}
 Blocks per Game: ${blocksPG}`
           );
-          tooltip.setAttribute('position', `0.5 0.5 0.5`); // Positioned to the side
+          tooltip.setAttribute('position', `0.5 0.5 0.5`);
           tooltip.setAttribute('align', 'center');
           tooltip.setAttribute('scale', '0.5 0.5 0.5');
           tooltip.setAttribute('color', 'yellow');
