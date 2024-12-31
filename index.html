@@ -35,6 +35,19 @@
     </a-scene>
 
     <script>
+      // Color logic based on metrics
+      function getColorFromMetric(metric, isPtPG = false) {
+        if (isPtPG) {
+          if (metric <= 0.75) return 'blue';
+          else if (metric > 0.75 && metric <= 1.0) return 'yellow';
+          else return 'green';
+        } else {
+          if (metric <= 60) return 'blue';
+          else if (metric > 60 && metric <= 70) return 'yellow';
+          else return 'green';
+        }
+      }
+
       // Fetch the scatterplot data
       fetch('scatter_data.json')
         .then(response => {
@@ -50,15 +63,15 @@
             const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name } = point;
 
             // Scale values for better VR visualization
-            const scaledX = x / 10; // Adjust scaling as needed
-            const scaledY = y * 5;
-            const scaledZ = z / 10;
+            const scaledX = x / 5; // Adjust scaling to separate points
+            const scaledY = y * 10; // Larger scaling for Y-axis
+            const scaledZ = z / 5; // Adjust scaling to separate points
 
             // Create the data point
             const sphere = document.createElement('a-sphere');
             sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
-            sphere.setAttribute('radius', 0.3);
-            sphere.setAttribute('color', getColorFromMetric(y));
+            sphere.setAttribute('radius', 0.2); // Smaller data points
+            sphere.setAttribute('color', getColorFromMetric(y, true));
             scatterplot.appendChild(sphere);
 
             // Add hoverable label
@@ -66,7 +79,7 @@
             tooltip.setAttribute('value', `${name}\nPtPG: ${y.toFixed(2)}`);
             tooltip.setAttribute('position', `${scaledX} ${scaledY + 0.5} ${scaledZ}`);
             tooltip.setAttribute('color', 'white');
-            tooltip.setAttribute('scale', '1 1 1');
+            tooltip.setAttribute('scale', '0.5 0.5 0.5');
             scatterplot.appendChild(tooltip);
           });
         })
