@@ -31,28 +31,30 @@
     <a-entity id="scatterplot" position="0 0 0"></a-entity>
 
     <!-- Camera Rig -->
-    <a-entity id="cameraRig" position="0 1.6 10" movement-controls="fly: true">
+    <a-entity id="cameraRig" position="0 1.6 10">
       <a-camera wasd-controls="enabled: false"></a-camera>
+    </a-entity>
 
-      <!-- Left Controller -->
-      <a-entity
-        id="leftController"
-        hand-controls="hand: left"
-        laser-controls="hand: left"
-        raycaster="objects: .hoverable"
-        line="color: cyan; opacity: 0.75"
-        position="-0.2 1.5 -0.5">
-      </a-entity>
+    <!-- Left Controller -->
+    <a-entity
+      id="leftController"
+      hand-controls="hand: left"
+      laser-controls="hand: left"
+      raycaster="objects: .hoverable"
+      line="color: cyan; opacity: 0.75"
+      position="-0.2 1.6 -0.5"
+      parent="cameraRig">
+    </a-entity>
 
-      <!-- Right Controller -->
-      <a-entity
-        id="rightController"
-        hand-controls="hand: right"
-        laser-controls="hand: right"
-        raycaster="objects: .hoverable"
-        line="color: yellow; opacity: 0.75"
-        position="0.2 1.5 -0.5">
-      </a-entity>
+    <!-- Right Controller -->
+    <a-entity
+      id="rightController"
+      hand-controls="hand: right"
+      laser-controls="hand: right"
+      raycaster="objects: .hoverable"
+      line="color: yellow; opacity: 0.75"
+      position="0.2 1.6 -0.5"
+      parent="cameraRig">
     </a-entity>
   </a-scene>
 
@@ -146,7 +148,7 @@ Blocks per Game: ${blocksPG}`
           cameraRig.position.x -= moveX;
           cameraRig.position.z += moveZ;
 
-          // Right joystick: Rotation (yaw and pitch)
+          // Right joystick: Rotation
           const rotateY = gp.axes[2] * 0.05; // Yaw (left/right rotation)
           const rotateX = gp.axes[3] * 0.05; // Pitch (up/down rotation)
           cameraRig.rotation.y -= rotateY;
