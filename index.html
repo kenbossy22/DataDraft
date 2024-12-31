@@ -49,7 +49,7 @@
         const scatterplot = document.getElementById('scatterplot');
 
         data.forEach(point => {
-          const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name } = point;
+          const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name, Games, G, A, Pts, PPP, ShotsPG, HitsPG, BlocksPG } = point;
 
           // Adjust the scale for better visualization
           const scaledX = x / 10;
@@ -71,14 +71,14 @@
 Completeness Rating: ${x.toFixed(1)}
 Weighted Rating: ${z.toFixed(1)}
 PtPG: ${y.toFixed(1)}
-Games: ${point['Games']}
-Goals: ${point['G']}
-Assists: ${point['A']}
-Points: ${point['Pts']}
-PPP: ${point['PPP']}
-ShotsPG: ${point['ShotsPG']}
-HitsPG: ${point['HitsPG']}
-BlocksPG: ${point['BlocksPG']}`
+Games: ${Games}
+Goals: ${G}
+Assists: ${A}
+Points: ${Pts}
+PPP: ${PPP}
+ShotsPG: ${ShotsPG}
+HitsPG: ${HitsPG}
+BlocksPG: ${BlocksPG}`
           );
           tooltip.setAttribute('position', `0 0.5 0`);
           tooltip.setAttribute('align', 'center');
@@ -87,8 +87,17 @@ BlocksPG: ${point['BlocksPG']}`
           tooltip.setAttribute('visible', false);
           sphere.appendChild(tooltip);
 
-          // Show tooltip on hover
-          sphere.addEventListener('mouseenter', () => tooltip.setAttribute('visible', true));
+          // Rotate tooltip to face the user dynamically
+          sphere.addEventListener('mouseenter', () => {
+            tooltip.setAttribute('visible', true);
+            const camera = document.querySelector('a-camera');
+            const cameraPosition = camera.object3D.position;
+            const spherePosition = sphere.object3D.position;
+            const direction = cameraPosition.clone().sub(spherePosition).normalize();
+            const rotation = Math.atan2(direction.x, direction.z) * (180 / Math.PI);
+            tooltip.setAttribute('rotation', `0 ${rotation} 0`);
+          });
+
           sphere.addEventListener('mouseleave', () => tooltip.setAttribute('visible', false));
         });
       })
