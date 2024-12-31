@@ -38,10 +38,10 @@
 
     <!-- VR Controllers -->
     <a-entity id="leftController" tracked-controls="controller: 0; hand: left" 
-              raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75">
+              raycaster="objects: .hoverable; near: 0.1; far: 5" line="color: yellow; opacity: 0.75">
     </a-entity>
     <a-entity id="rightController" tracked-controls="controller: 1; hand: right" 
-              raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75">
+              raycaster="objects: .hoverable; near: 0.1; far: 5" line="color: yellow; opacity: 0.75">
     </a-entity>
   </a-scene>
 
@@ -73,7 +73,7 @@
 
           const sphere = document.createElement('a-sphere');
           sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
-          sphere.setAttribute('radius', 0.2);
+          sphere.setAttribute('radius', 0.15); // Reduced radius
           sphere.setAttribute('color', getColorFromMetric(y));
           sphere.setAttribute('class', 'hoverable');
           scatterplot.appendChild(sphere);
@@ -94,8 +94,8 @@ Shots per Game: ${shotsPG}
 Hits per Game: ${hitsPG}
 Blocks per Game: ${blocksPG}`
           );
-          tooltip.setAttribute('position', `0 0.5 0`);
-          tooltip.setAttribute('align', 'center');
+          tooltip.setAttribute('position', `0.3 0 0.3`); // Offset tooltip to appear next to the sphere
+          tooltip.setAttribute('align', 'left');
           tooltip.setAttribute('scale', '0.5 0.5 0.5');
           tooltip.setAttribute('color', 'yellow');
           tooltip.setAttribute('visible', false);
