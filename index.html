@@ -33,26 +33,26 @@
     <!-- Camera Rig -->
     <a-entity id="cameraRig" position="0 1.6 10" movement-controls="fly: true">
       <a-camera wasd-controls="enabled: false"></a-camera>
-    </a-entity>
 
-    <!-- Left Controller -->
-    <a-entity
-      id="leftController"
-      hand-controls="hand: left"
-      laser-controls="hand: left"
-      raycaster="objects: .hoverable"
-      line="color: cyan; opacity: 0.75"
-      position="0 1.5 -0.5">
-    </a-entity>
+      <!-- Left Controller -->
+      <a-entity
+        id="leftController"
+        hand-controls="hand: left"
+        laser-controls="hand: left"
+        raycaster="objects: .hoverable"
+        line="color: cyan; opacity: 0.75"
+        position="-0.2 1.5 -0.5">
+      </a-entity>
 
-    <!-- Right Controller -->
-    <a-entity
-      id="rightController"
-      hand-controls="hand: right"
-      laser-controls="hand: right"
-      raycaster="objects: .hoverable"
-      line="color: yellow; opacity: 0.75"
-      position="0 1.5 -0.5">
+      <!-- Right Controller -->
+      <a-entity
+        id="rightController"
+        hand-controls="hand: right"
+        laser-controls="hand: right"
+        raycaster="objects: .hoverable"
+        line="color: yellow; opacity: 0.75"
+        position="0.2 1.5 -0.5">
+      </a-entity>
     </a-entity>
   </a-scene>
 
