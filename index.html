@@ -91,3 +91,62 @@
   </body>
 </html>
 
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>3D Scatterplot in VR</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <!-- Sky for immersion -->
+      <a-sky color="#000"></a-sky>
+
+      <!-- Scatterplot Container -->
+      <a-entity id="scatterplot-container" position="0 1.6 -3" rotation="0 0 0" drag-rotate-component>
+        <!-- Scatterplot will be added dynamically -->
+        <a-entity id="scatterplot"></a-entity>
+      </a-entity>
+
+      <!-- Camera -->
+      <a-camera position="0 1.6 0">
+        <a-cursor></a-cursor>
+      </a-camera>
+    </a-scene>
+
+    <script>
+      // Load scatterplot data
+      fetch('scatter_data.json')
+        .then(response => response.json())
+        .then(data => {
+          const scatterplot = document.getElementById('scatterplot');
+
+          // Define color mapping function
+          function getColor(value) {
+            const max = 5; // Replace with actual max
+            const min = 0; // Replace with actual min
+            const ratio = (value - min) / (max - min);
+            const hue = Math.floor(240 - 240 * ratio); // 240 = blue, 0 = red
+            return `hsl(${hue}, 100%, 50%)`;
+          }
+
+          // Create spheres for each data point
+          data.forEach(point => {
+            const { 'Completeness Rating': x, 'Weighted_Rating': y, PtPG: z, 'Player Name': name } = point;
+
+            const sphere = document.createElement('a-sphere');
+            sphere.setAttribute('position', `${x} ${y} ${z}`);
+            sphere.setAttribute('radius', 0.1);
+            sphere.setAttribute('color', getColor(z));
+
+            // Add hoverable tooltips
+            sphere.setAttribute('hoverable', true);
+            sphere.setAttribute('tooltip', `Player: ${name}\nPtPG: ${z.toFixed(2)}`);
+
+            scatterplot.appendChild(sphere);
+          });
+        });
+    </script>
+  </body>
+</html>
