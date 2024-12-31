@@ -27,14 +27,16 @@
     <!-- Data Points -->
     <a-entity id="scatterplot" position="0 0 0" grab hoverable super-hands></a-entity>
 
-    <!-- Camera -->
-    <a-camera position="0 5 20" wasd-controls="enabled: true" look-controls>
-      <a-cursor></a-cursor>
-    </a-camera>
+    <!-- Camera Rig -->
+    <a-entity id="cameraRig" position="0 1.6 5">
+      <a-camera wasd-controls-enabled="false" look-controls>
+        <a-cursor color="yellow"></a-cursor>
+      </a-camera>
+    </a-entity>
 
-    <!-- Hand Controllers -->
-    <a-entity hand-controls="hand: left; handModelStyle: lowPoly; color: #ffcccc"></a-entity>
-    <a-entity hand-controls="hand: right; handModelStyle: lowPoly; color: #ccccff"></a-entity>
+    <!-- VR Hand Controllers -->
+    <a-entity id="leftHand" hand-controls="hand: left" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75"></a-entity>
+    <a-entity id="rightHand" hand-controls="hand: right" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75"></a-entity>
   </a-scene>
 
   <script>
@@ -49,7 +51,6 @@
         const scatterplot = document.getElementById('scatterplot');
 
         data.forEach(point => {
-          // Destructure the JSON object with exact key names
           const {
             "Completeness Rating": x,
             "Weighted_Rating": z,
@@ -75,7 +76,7 @@
           sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
           sphere.setAttribute('radius', 0.2);
           sphere.setAttribute('color', getColorFromMetric(y));
-          sphere.setAttribute('hoverable', true); // Allows hover interactions
+          sphere.setAttribute('class', 'hoverable'); // Enable raycasting interactions
           scatterplot.appendChild(sphere);
 
           // Create tooltip for the datapoint
@@ -102,24 +103,13 @@ Blocks per Game: ${blocksPG}`
           tooltip.setAttribute('visible', false);
           sphere.appendChild(tooltip);
 
-          // Rotate tooltip to face the user dynamically
-          sphere.addEventListener('mouseenter', () => {
+          // Show tooltip on raycast hover
+          sphere.addEventListener('raycaster-intersected', () => {
             tooltip.setAttribute('visible', true);
-            const camera = document.querySelector('a-camera');
-            const cameraPosition = camera.object3D.position;
-            const spherePosition = sphere.object3D.position;
-            const direction = cameraPosition
-              .clone()
-              .sub(spherePosition)
-              .normalize();
-            const rotation =
-              Math.atan2(direction.x, direction.z) * (180 / Math.PI);
-            tooltip.setAttribute('rotation', `0 ${rotation} 0`);
           });
-
-          sphere.addEventListener('mouseleave', () =>
-            tooltip.setAttribute('visible', false)
-          );
+          sphere.addEventListener('raycaster-intersected-cleared', () => {
+            tooltip.setAttribute('visible', false);
+          });
         });
       })
       .catch(error => {
