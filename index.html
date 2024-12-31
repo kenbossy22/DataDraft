@@ -5,7 +5,6 @@
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.0/dist/aframe-physics-system.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/super-hands"></script>
 </head>
 <body>
   <a-scene physics vr-mode-ui="enabled: true" webxr="referenceSpaceType: local">
@@ -37,7 +36,7 @@
       <!-- Left Controller -->
       <a-entity
         id="leftController"
-        hand-controls="hand: left"
+        oculus-touch-controls="hand: left"
         laser-controls="hand: left"
         raycaster="objects: .hoverable"
         line="color: cyan; opacity: 0.75"
@@ -47,7 +46,7 @@
       <!-- Right Controller -->
       <a-entity
         id="rightController"
-        hand-controls="hand: right"
+        oculus-touch-controls="hand: right"
         laser-controls="hand: right"
         raycaster="objects: .hoverable"
         line="color: yellow; opacity: 0.75"
@@ -147,13 +146,13 @@ Blocks per Game: ${blocksPG}`
           cameraRig.position.z += moveZ;
 
           // Right joystick: Rotation
-          const rotateY = gp.axes[2] * 0.05; // Yaw (left/right rotation)
-          const rotateX = gp.axes[3] * 0.05; // Pitch (up/down rotation)
+          const rotateY = gp.axes[2] * 0.05;
+          const rotateX = gp.axes[3] * 0.05;
           cameraRig.rotation.y -= rotateY;
           cameraRig.rotation.x = Math.max(
             Math.min(cameraRig.rotation.x - rotateX, Math.PI / 2),
             -Math.PI / 2
-          ); // Clamp pitch
+          );
         }
 
         requestAnimationFrame(updateControls);
