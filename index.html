@@ -1,99 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>3D Player Metrics Visualization in VR</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-  </head>
-  <body>
-    <a-scene>
-      <!-- Background sky for theme matching Dash -->
-      <a-sky color="#262626"></a-sky>
-
-      <!-- 3D Scatterplot Container -->
-      <a-entity id="scatterplot"></a-entity>
-
-      <!-- Axes with Titles -->
-      <!-- X-axis -->
-      <a-entity line="start: -5 0 0; end: 5 0 0; color: white"></a-entity>
-      <a-text value="Completeness Rating" position="5 0 0.5" rotation="0 0 0" color="white"></a-text>
-
-      <!-- Y-axis -->
-      <a-entity line="start: 0 -5 0; end: 0 5 0; color: white"></a-entity>
-      <a-text value="Weighted Rating" position="0 5 0.5" rotation="0 0 0" color="white"></a-text>
-
-      <!-- Z-axis -->
-      <a-entity line="start: 0 0 -5; end: 0 0 5; color: white"></a-entity>
-      <a-text value="Points per Game" position="0.5 0 5" rotation="0 0 0" color="white"></a-text>
-
-      <!-- Bounding Box -->
-      <a-box position="0 0 0" width="10" height="10" depth="10" color="white" wireframe="true"></a-box>
-
-      <!-- Title -->
-      <a-text value="3D Player Metrics Visualization" position="0 6 -8" color="silver" align="center"></a-text>
-
-      <!-- Camera and Cursor -->
-      <a-camera position="0 1.6 10">
-        <a-cursor></a-cursor>
-      </a-camera>
-    </a-scene>
-
-    <script>
-      // Utility function for dynamic color scaling based on PtPG
-      const colorScale = (value) => {
-        const min = 0, max = 5; // Adjust range based on your data
-        const ratio = (value - min) / (max - min);
-        return `rgb(${255 - ratio * 255}, ${ratio * 255}, 150)`; // Gradient from red to green
-      };
-
-      // Load scatterplot data
-      fetch('scatter_data.json')
-        .then(response => response.json())
-        .then(data => {
-          const scatterplot = document.getElementById('scatterplot');
-
-          data.forEach(point => {
-            const {
-              'Completeness Rating': x,
-              'Weighted_Rating': y,
-              PtPG: z,
-              'Player Name': name,
-              Games: games
-            } = point;
-
-            // Create a sphere for each data point
-            const sphere = document.createElement('a-sphere');
-            sphere.setAttribute('position', `${x} ${y} ${z}`);
-            sphere.setAttribute('radius', games / 50); // Normalize size based on Games
-            sphere.setAttribute('color', colorScale(z));
-
-            // Add hover text with player metrics
-            const tooltip = document.createElement('a-text');
-            tooltip.setAttribute(
-              'value',
-              `Player: ${name}\nCompleteness: ${x}\nWeighted Rating: ${y}\nPtPG: ${z}`
-            );
-            tooltip.setAttribute('position', '0 0.5 0');
-            tooltip.setAttribute('visible', false);
-            tooltip.setAttribute('color', 'silver');
-            tooltip.setAttribute('align', 'center');
-
-            sphere.appendChild(tooltip);
-
-            // Show tooltip on hover
-            sphere.addEventListener('mouseenter', () => tooltip.setAttribute('visible', true));
-            sphere.addEventListener('mouseleave', () => tooltip.setAttribute('visible', false));
-
-            scatterplot.appendChild(sphere);
-          });
-        });
-    </script>
-  </body>
-</html>
-
-<!DOCTYPE html>
-<html>
-  <head>
     <title>3D Scatterplot in VR</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
@@ -105,12 +12,22 @@
 
       <!-- Scatterplot Container -->
       <a-entity id="scatterplot-container" position="0 1.6 -3" rotation="0 0 0" drag-rotate-component>
-        <!-- Scatterplot will be added dynamically -->
+        <!-- Axes -->
+        <a-entity line="start: -3 0 0; end: 3 0 0; color: red"></a-entity>
+        <a-text value="Completeness Rating" position="3 0 0" rotation="0 0 0"></a-text>
+
+        <a-entity line="start: 0 -3 0; end: 0 3 0; color: green"></a-entity>
+        <a-text value="Weighted Rating" position="0 3 0" rotation="0 0 0"></a-text>
+
+        <a-entity line="start: 0 0 -3; end: 0 0 3; color: blue"></a-entity>
+        <a-text value="PtPG" position="0 0 3" rotation="0 0 0"></a-text>
+
+        <!-- Scatterplot -->
         <a-entity id="scatterplot"></a-entity>
       </a-entity>
 
       <!-- Camera -->
-      <a-camera position="0 1.6 0">
+      <a-camera position="0 1.6 0" rotation="0 0 0">
         <a-cursor></a-cursor>
       </a-camera>
     </a-scene>
@@ -122,25 +39,22 @@
         .then(data => {
           const scatterplot = document.getElementById('scatterplot');
 
-          // Define color mapping function
-          function getColor(value) {
-            const max = 5; // Replace with actual max
-            const min = 0; // Replace with actual min
-            const ratio = (value - min) / (max - min);
-            const hue = Math.floor(240 - 240 * ratio); // 240 = blue, 0 = red
-            return `hsl(${hue}, 100%, 50%)`;
+          function scale(value, min, max, scaledMin, scaledMax) {
+            return ((value - min) / (max - min)) * (scaledMax - scaledMin) + scaledMin;
           }
 
-          // Create spheres for each data point
+          // Set min/max for scaling (replace with actual values)
+          const zMin = 0, zMax = 5;
+
           data.forEach(point => {
             const { 'Completeness Rating': x, 'Weighted_Rating': y, PtPG: z, 'Player Name': name } = point;
 
-            const sphere = document.createElement('a-sphere');
-            sphere.setAttribute('position', `${x} ${y} ${z}`);
-            sphere.setAttribute('radius', 0.1);
-            sphere.setAttribute('color', getColor(z));
+            const scaledZ = scale(z, zMin, zMax, -5, 5);
 
-            // Add hoverable tooltips
+            const sphere = document.createElement('a-sphere');
+            sphere.setAttribute('position', `${x} ${y} ${scaledZ}`);
+            sphere.setAttribute('radius', 0.1);
+            sphere.setAttribute('color', `hsl(${240 - 240 * (z / zMax)}, 100%, 50%)`);
             sphere.setAttribute('hoverable', true);
             sphere.setAttribute('tooltip', `Player: ${name}\nPtPG: ${z.toFixed(2)}`);
 
