@@ -47,18 +47,18 @@
           const scatterplot = document.getElementById('scatterplot');
 
           data.forEach(point => {
-            const { 'Completeness Rating': x, 'Weighted_Rating': z, PtPG: y, 'Player Name': name } = point;
+            const { 'Completeness Rating': x, 'Weighted_Rating': z, 'PtPG': y, 'Player Name': name } = point;
 
             // Scale values for better VR visualization
             const scaledX = x / 10; // Adjust scaling as needed
-            const scaledY = y * 2;
+            const scaledY = y * 5;
             const scaledZ = z / 10;
 
             // Create the data point
             const sphere = document.createElement('a-sphere');
             sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
             sphere.setAttribute('radius', 0.3);
-            sphere.setAttribute('color', '#FF5733');
+            sphere.setAttribute('color', getColorFromMetric(y));
             scatterplot.appendChild(sphere);
 
             // Add hoverable label
