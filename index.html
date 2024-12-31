@@ -8,9 +8,12 @@
   <script src="https://cdn.jsdelivr.net/npm/super-hands"></script>
 </head>
 <body>
-  <a-scene>
+  <a-scene physics>
     <!-- Sky -->
-    <a-sky color="#000" radius="50"></a-sky>
+    <a-sky color="#000" radius="100"></a-sky>
+
+    <!-- Ground -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#111" static-body></a-plane>
 
     <!-- Axes -->
     <a-entity>
@@ -25,18 +28,22 @@
     </a-entity>
 
     <!-- Data Points -->
-    <a-entity id="scatterplot" position="0 0 0" grab hoverable super-hands></a-entity>
+    <a-entity id="scatterplot" position="0 0 0"></a-entity>
 
     <!-- Camera Rig -->
-    <a-entity id="cameraRig" position="0 1.6 5">
-      <a-camera wasd-controls-enabled="false" look-controls>
+    <a-entity id="cameraRig" position="0 1.6 10" movement-controls="fly: true">
+      <a-camera wasd-controls-enabled="false">
         <a-cursor color="yellow"></a-cursor>
       </a-camera>
     </a-entity>
 
-    <!-- VR Hand Controllers -->
-    <a-entity id="leftHand" hand-controls="hand: left" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75"></a-entity>
-    <a-entity id="rightHand" hand-controls="hand: right" raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75"></a-entity>
+    <!-- VR Controllers -->
+    <a-entity id="leftController" tracked-controls="controller: 0; hand: left" 
+              raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75">
+    </a-entity>
+    <a-entity id="rightController" tracked-controls="controller: 1; hand: right" 
+              raycaster="objects: .hoverable" line="color: yellow; opacity: 0.75">
+    </a-entity>
   </a-scene>
 
   <script>
@@ -124,3 +131,4 @@ Blocks per Game: ${blocksPG}`
   </script>
 </body>
 </html>
+
