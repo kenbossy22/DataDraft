@@ -5,6 +5,7 @@
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.0/dist/aframe-physics-system.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/super-hands"></script>
 </head>
 <body>
   <a-scene physics vr-mode-ui="enabled: true" webxr="referenceSpaceType: local">
@@ -30,66 +31,66 @@
     <a-entity id="scatterplot" position="0 0 0"></a-entity>
 
     <!-- Camera Rig -->
-    <a-entity id="cameraRig" position="0 1.6 10">
-      <a-camera id="camera"></a-camera>
-
+    <a-entity id="cameraRig" position="0 1.6 10" movement-controls="fly: true">
+      <a-camera wasd-controls-enabled="false">
+        <!-- Removed a-cursor to disable eye/headset tracking -->
+      </a-camera>
       <!-- Left Controller -->
       <a-entity
         id="leftController"
-        oculus-touch-controls="hand: left"
-        raycaster="objects:.hoverable"
-        line="color: cyan; opacity: 0.75"
-        position="-0.2 0 -0.5">
+        hand-controls="hand: left"
+        laser-controls="hand: left"
+        raycaster="objects: .hoverable"
+        line="color: cyan; opacity: 0.75">
       </a-entity>
-
       <!-- Right Controller -->
       <a-entity
         id="rightController"
-        oculus-touch-controls="hand: right"
-        raycaster="objects:.hoverable"
-        line="color: yellow; opacity: 0.75"
-        position="0.2 0 -0.5">
+        hand-controls="hand: right"
+        laser-controls="hand: right"
+        raycaster="objects: .hoverable"
+        line="color: yellow; opacity: 0.75">
       </a-entity>
     </a-entity>
+  </a-scene>
 
-    <script>
-      // Load scatterplot data
-      fetch('scatter_data.json')
-        .then(response => response.json())
-        .then(data => {
-          const scatterplot = document.getElementById('scatterplot');
+  <script>
+    fetch('scatter_data.json')
+      .then(response => response.json())
+      .then(data => {
+        const scatterplot = document.getElementById('scatterplot');
 
-          data.forEach(point => {
-            const {
-              "Completeness Rating": x,
-              "Weighted_Rating": z,
-              "PtPG": y,
-              "Player Name": name,
-              "Games": games,
-              "G": goals,
-              "A": assists,
-              "Pts": points,
-              "PPP": ppp,
-              "ShotsPG": shotsPG,
-              "HitsPG": hitsPG,
-              "BlocksPG": blocksPG
-            } = point;
+        data.forEach(point => {
+          const {
+            "Completeness Rating": x,
+            "Weighted_Rating": z,
+            "PtPG": y,
+            "Player Name": name,
+            "Games": games,
+            "G": goals,
+            "A": assists,
+            "Pts": points,
+            "PPP": ppp,
+            "ShotsPG": shotsPG,
+            "HitsPG": hitsPG,
+            "BlocksPG": blocksPG
+          } = point;
 
-            const scaledX = x / 10;
-            const scaledY = y * 5;
-            const scaledZ = z / 10;
+          const scaledX = x / 10;
+          const scaledY = y * 5;
+          const scaledZ = z / 10;
 
-            const sphere = document.createElement('a-sphere');
-            sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
-            sphere.setAttribute('radius', 0.2);
-            sphere.setAttribute('color', getColorFromMetric(y));
-            sphere.setAttribute('class', 'hoverable');
-            scatterplot.appendChild(sphere);
+          const sphere = document.createElement('a-sphere');
+          sphere.setAttribute('position', ${scaledX} ${scaledY} ${scaledZ});
+          sphere.setAttribute('radius', 0.2);
+          sphere.setAttribute('color', getColorFromMetric(y));
+          sphere.setAttribute('class', 'hoverable');
+          scatterplot.appendChild(sphere);
 
-            const tooltip = document.createElement('a-text');
-            tooltip.setAttribute(
-              'value',
-              `Player: ${name}
+          const tooltip = document.createElement('a-text');
+          tooltip.setAttribute(
+            'value',
+            Player: ${name}
 Completeness Rating: ${x.toFixed(1)}
 Weighted Rating: ${z.toFixed(1)}
 Points per Game (PtPG): ${y.toFixed(2)}
@@ -100,66 +101,67 @@ Points: ${points}
 Powerplay Points: ${ppp}
 Shots per Game: ${shotsPG}
 Hits per Game: ${hitsPG}
-Blocks per Game: ${blocksPG}`
-            );
-            tooltip.setAttribute('position', `0.5 0 0.5`);
-            tooltip.setAttribute('align', 'center');
-            tooltip.setAttribute('scale', '0.5 0.5 0.5');
-            tooltip.setAttribute('color', 'yellow');
-            tooltip.setAttribute('visible', false);
-            sphere.appendChild(tooltip);
+Blocks per Game: ${blocksPG}
+          );
+          tooltip.setAttribute('position', 0.5 0 0.5); // Position to the side
+          tooltip.setAttribute('align', 'center');
+          tooltip.setAttribute('scale', '0.5 0.5 0.5');
+          tooltip.setAttribute('color', 'yellow');
+          tooltip.setAttribute('visible', false);
+          sphere.appendChild(tooltip);
 
-            // Tooltip interaction
-            sphere.addEventListener('raycaster-intersected', () => {
-              tooltip.setAttribute('visible', true);
-            });
-
-            sphere.addEventListener('raycaster-intersected-cleared', () => {
-              tooltip.setAttribute('visible', false);
-            });
+          // Tooltip Interaction
+          sphere.addEventListener('raycaster-intersected', () => {
+            tooltip.setAttribute('visible', true);
+            const camera = document.querySelector('a-camera');
+            const cameraPosition = camera.object3D.position;
+            const spherePosition = sphere.object3D.position;
+            const direction = cameraPosition.clone().sub(spherePosition).normalize();
+            const rotation = Math.atan2(direction.x, direction.z) * (180 / Math.PI);
+            tooltip.setAttribute('rotation', 0 ${rotation} 0);
           });
-        })
-        .catch(error => console.error('Error loading scatterplot data:', error));
 
-      function getColorFromMetric(ptpg) {
-        if (ptpg < 0.75) return 'blue';
-        if (ptpg <= 1.0) return 'yellow';
-        return 'green';
-      }
+          sphere.addEventListener('raycaster-intersected-cleared', () => {
+            tooltip.setAttribute('visible', false);
+          });
+        });
+      })
+      .catch(error => console.error('Error loading scatterplot data:', error));
 
-      // Custom joystick handling
-      document.addEventListener('gamepadconnected', () => {
-        const cameraRig = document.getElementById('cameraRig').object3D;
+    function getColorFromMetric(ptpg) {
+      if (ptpg < 0.75) return 'blue';
+      if (ptpg <= 1.0) return 'yellow';
+      return 'green';
+    }
 
-        const updateControls = () => {
-          const gamepads = navigator.getGamepads();
-          const gp = gamepads[0]; // Assuming the first gamepad is the one in use
+    // Right Joystick Pitch/Yaw Controls
+    document.addEventListener('gamepadconnected', () => {
+      const cameraRig = document.getElementById('cameraRig').object3D;
 
-          if (gp) {
-            // Left joystick: Movement
-            const moveX = gp.axes[0] * 0.2;
-            const moveZ = gp.axes[1] * 0.2;
-            cameraRig.position.x += moveX;
-            cameraRig.position.z -= moveZ;
+      const updateControls = () => {
+        const gamepads = navigator.getGamepads();
+        const gp = gamepads[0]; // Assuming Oculus controller is the first gamepad
 
-            // Right joystick: Rotation
-            const rotateY = gp.axes[2] * 0.05;
-            const rotateX = gp.axes[3] * 0.05;
-            cameraRig.rotation.y += rotateY;
-            cameraRig.rotation.x += rotateX;
+        if (gp) {
+          // Left joystick: Movement
+          const moveX = gp.axes[0] * 0.2; // Horizontal (left/right)
+          const moveZ = gp.axes[1] * 0.2; // Vertical (forward/backward)
+          cameraRig.position.x -= moveX;
+          cameraRig.position.z += moveZ;
 
-            // Limit camera rotation on X-axis
-            cameraRig.rotation.x = Math.max(
-              Math.min(cameraRig.rotation.x, Math.PI / 2),
-              -Math.PI / 2
-            );
-          }
+          // Right joystick: Rotation (pitch and yaw)
+          const rotateY = gp.axes[2] * 0.05; // Horizontal (yaw)
+          const rotateX = gp.axes[3] * 0.05; // Vertical (pitch)
+          cameraRig.rotation.y -= rotateY; // Yaw rotation
+          cameraRig.rotation.x -= rotateX; // Pitch rotation
+          cameraRig.rotation.x = Math.max(Math.min(cameraRig.rotation.x, Math.PI / 2), -Math.PI / 2); // Clamp pitch
+        }
 
-          requestAnimationFrame(updateControls);
-        };
+        requestAnimationFrame(updateControls);
+      };
 
-        updateControls();
-      });
-    </script>
+      updateControls();
+    });
+  </script>
 </body>
 </html>
