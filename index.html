@@ -32,18 +32,13 @@
 
     <!-- Camera Rig -->
     <a-entity id="cameraRig" position="0 1.6 10" movement-controls="fly: true">
-      <a-camera wasd-controls-enabled="false">
-        <!-- Removed a-cursor to disable eye/headset tracking -->
-      </a-camera>
-      <!-- Left Controller -->
+      <a-camera wasd-controls-enabled="false"></a-camera>
+      <!-- Left Controller (No Laser Pointer) -->
       <a-entity
         id="leftController"
-        hand-controls="hand: left"
-        laser-controls="hand: left"
-        raycaster="objects: .hoverable"
-        line="color: cyan; opacity: 0.75">
+        hand-controls="hand: left">
       </a-entity>
-      <!-- Right Controller -->
+      <!-- Right Controller with Laser Pointer -->
       <a-entity
         id="rightController"
         hand-controls="hand: right"
@@ -81,7 +76,7 @@
           const scaledZ = z / 10;
 
           const sphere = document.createElement('a-sphere');
-          sphere.setAttribute('position', ${scaledX} ${scaledY} ${scaledZ});
+          sphere.setAttribute('position', `${scaledX} ${scaledY} ${scaledZ}`);
           sphere.setAttribute('radius', 0.2);
           sphere.setAttribute('color', getColorFromMetric(y));
           sphere.setAttribute('class', 'hoverable');
@@ -90,7 +85,7 @@
           const tooltip = document.createElement('a-text');
           tooltip.setAttribute(
             'value',
-            Player: ${name}
+            `Player: ${name}
 Completeness Rating: ${x.toFixed(1)}
 Weighted Rating: ${z.toFixed(1)}
 Points per Game (PtPG): ${y.toFixed(2)}
@@ -101,9 +96,9 @@ Points: ${points}
 Powerplay Points: ${ppp}
 Shots per Game: ${shotsPG}
 Hits per Game: ${hitsPG}
-Blocks per Game: ${blocksPG}
+Blocks per Game: ${blocksPG}`
           );
-          tooltip.setAttribute('position', 0.5 0 0.5); // Position to the side
+          tooltip.setAttribute('position', `0.5 0.5 0.5`);
           tooltip.setAttribute('align', 'center');
           tooltip.setAttribute('scale', '0.5 0.5 0.5');
           tooltip.setAttribute('color', 'yellow');
@@ -113,12 +108,6 @@ Blocks per Game: ${blocksPG}
           // Tooltip Interaction
           sphere.addEventListener('raycaster-intersected', () => {
             tooltip.setAttribute('visible', true);
-            const camera = document.querySelector('a-camera');
-            const cameraPosition = camera.object3D.position;
-            const spherePosition = sphere.object3D.position;
-            const direction = cameraPosition.clone().sub(spherePosition).normalize();
-            const rotation = Math.atan2(direction.x, direction.z) * (180 / Math.PI);
-            tooltip.setAttribute('rotation', 0 ${rotation} 0);
           });
 
           sphere.addEventListener('raycaster-intersected-cleared', () => {
