@@ -37,7 +37,7 @@
       <a-entity
         id="leftController"
         oculus-touch-controls="hand: left"
-        raycaster="objects: .hoverable"
+        raycaster="objects:.hoverable"
         line="color: cyan; opacity: 0.75"
         position="-0.2 0 -0.5">
       </a-entity>
@@ -46,7 +46,7 @@
       <a-entity
         id="rightController"
         oculus-touch-controls="hand: right"
-        raycaster="objects: .hoverable"
+        raycaster="objects:.hoverable"
         line="color: yellow; opacity: 0.75"
         position="0.2 0 -0.5">
       </a-entity>
@@ -56,8 +56,8 @@
   <script>
     // Load scatterplot data
     fetch('scatter_data.json')
-      .then(response => response.json())
-      .then(data => {
+.then(response => response.json())
+.then(data => {
         const scatterplot = document.getElementById('scatterplot');
 
         data.forEach(point => {
@@ -120,7 +120,7 @@ Blocks per Game: ${blocksPG}`
           });
         });
       })
-      .catch(error => console.error('Error loading scatterplot data:', error));
+.catch(error => console.error('Error loading scatterplot data:', error));
 
     function getColorFromMetric(ptpg) {
       if (ptpg < 0.75) return 'blue';
@@ -134,21 +134,24 @@ Blocks per Game: ${blocksPG}`
 
       const updateControls = () => {
         const gamepads = navigator.getGamepads();
-        const gp = gamepads[0]; // Assuming the first gamepad is the one in use
+        const gp = gamepads; // Assuming the first gamepad is the one in use
 
         if (gp) {
           // Left joystick: Movement
-          const moveX = gp.axes[0] * 0.2;
-          const moveZ = gp.axes[1] * 0.2;
-          cameraRig.position.x -= moveX;
-          cameraRig.position.z += moveZ;
+          const moveX = gp.axes * 0.2;
+          const moveZ = gp.axes * 0.2;
+          cameraRig.position.x += moveX;
+          cameraRig.position.z -= moveZ;
 
           // Right joystick: Rotation
-          const rotateY = gp.axes[2] * 0.05;
-          const rotateX = gp.axes[3] * 0.05;
-          cameraRig.rotation.y -= rotateY;
+          const rotateY = gp.axes * 0.05;
+          const rotateX = gp.axes * 0.05;
+          cameraRig.rotation.y += rotateY;
+          cameraRig.rotation.x += rotateX;
+
+          // Limit camera rotation on X-axis
           cameraRig.rotation.x = Math.max(
-            Math.min(cameraRig.rotation.x - rotateX, Math.PI / 2),
+            Math.min(cameraRig.rotation.x, Math.PI / 2),
             -Math.PI / 2
           );
         }
