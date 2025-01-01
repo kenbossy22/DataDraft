@@ -2,8 +2,9 @@
 <html>
 <head>
   <title>3D Scatterplot in VR</title>
+  <meta charset="utf-8">
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script src="https://gftruj.github.io/webzamples/aframe/controls/oculus-thumbstick-controls.js"></script>
+  <!-- Include any additional A-Frame components if necessary -->
 </head>
 <body>
   <a-scene physics vr-mode-ui="enabled: true" webxr="referenceSpaceType: local">
@@ -29,25 +30,119 @@
     <a-entity id="scatterplot" position="0 0 0"></a-entity>
 
     <!-- Camera and Controllers Rig -->
-    <a-entity id="rig" position="0 1.6 10">
-      <a-camera id="camera"></a-camera>
+    <a-entity id="rig" position="0 1.6 10" camera-controls>
+      <a-camera id="camera" wasd-controls-enabled="false"></a-camera>
 
-      <!-- Left Controller -->
+      <!-- Left Controller with Laser Pointer -->
       <a-entity
         id="leftController"
-        oculus-touch-controls="hand: left">
+        oculus-touch-controls="hand: left"
+        laser-controls="hand: left">
       </a-entity>
 
-      <!-- Right Controller -->
+      <!-- Right Controller with Laser Pointer -->
       <a-entity
         id="rightController"
         oculus-touch-controls="hand: right"
-        oculus-thumbstick-controls>
+        laser-controls="hand: right">
       </a-entity>
     </a-entity>
   </a-scene>
 
+  <!-- Custom Components -->
   <script>
+    // Camera Controls Component
+    AFRAME.registerComponent('camera-controls', {
+      schema: {
+        speed: {type: 'number', default: 0.1},
+        rotationSpeed: {type: 'number', default: 0.02}
+      },
+      init: function () {
+        this.cameraRig = this.el; // Assuming this component is attached to the rig
+        this.controllerLeft = null;
+        this.controllerRight = null;
+      },
+      tick: function (time, deltaTime) {
+        // Find controllers if not already found
+        if (!this.controllerLeft || !this.controllerRight) {
+          const leftControllerEl = document.querySelector('#leftController');
+          const rightControllerEl = document.querySelector('#rightController');
+          if (leftControllerEl && leftControllerEl.components['oculus-touch-controls']) {
+            this.controllerLeft = leftControllerEl.components['oculus-touch-controls'].controller;
+          }
+          if (rightControllerEl && rightControllerEl.components['oculus-touch-controls']) {
+            this.controllerRight = rightControllerEl.components['oculus-touch-controls'].controller;
+          }
+          if (!this.controllerLeft || !this.controllerRight) return;
+        }
+
+        // Left Joystick for Movement
+        const leftAxes = this.controllerLeft.axes;
+        if (leftAxes && leftAxes.length >= 2) {
+          const moveX = leftAxes[0];
+          const moveZ = leftAxes[1];
+          const movement = new THREE.Vector3(moveX, 0, moveZ);
+          movement.applyQuaternion(this.cameraRig.object3D.quaternion);
+          movement.multiplyScalar(this.data.speed * (deltaTime / 16)); // Normalize speed
+          this.cameraRig.object3D.position.add(movement);
+        }
+
+        // Right Joystick for Rotation
+        const rightAxes = this.controllerRight.axes;
+        if (rightAxes && rightAxes.length >= 2) {
+          const rotateY = rightAxes[0];
+          const rotateX = rightAxes[1];
+          this.cameraRig.object3D.rotation.y -= rotateY * this.data.rotationSpeed;
+          this.cameraRig.object3D.rotation.x -= rotateX * this.data.rotationSpeed;
+          // Clamp the pitch to prevent flipping
+          this.cameraRig.object3D.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.cameraRig.object3D.rotation.x));
+        }
+      }
+    });
+
+    // Laser Controls Component
+    AFRAME.registerComponent('laser-controls', {
+      schema: {
+        hand: {type: 'string', default: 'right'}
+      },
+      init: function () {
+        const data = this.data;
+        const el = this.el;
+
+        // Create a raycaster
+        const raycaster = document.createElement('a-entity');
+        raycaster.setAttribute('raycaster', {
+          objects: '.hoverable',
+          showLine: false
+        });
+        raycaster.setAttribute('line', {
+          color: '#FFFFFF',
+          opacity: 0.75,
+          start: '0 0 0',
+          end: '0 0 -1'
+        });
+        raycaster.setAttribute('visible', true);
+        el.appendChild(raycaster);
+
+        // Listen for intersection events
+        raycaster.addEventListener('raycaster-intersected', function (evt) {
+          const intersectedEl = evt.detail.el;
+          const tooltip = intersectedEl.querySelector('a-text');
+          if (tooltip) {
+            tooltip.setAttribute('visible', true);
+          }
+        });
+
+        raycaster.addEventListener('raycaster-intersected-cleared', function (evt) {
+          const intersectedEl = evt.detail.el;
+          const tooltip = intersectedEl.querySelector('a-text');
+          if (tooltip) {
+            tooltip.setAttribute('visible', false);
+          }
+        });
+      }
+    });
+
     // Load scatterplot data
     fetch('scatter_data.json')
       .then(response => response.json())
@@ -103,15 +198,6 @@ Blocks per Game: ${blocksPG}`
           tooltip.setAttribute('color', 'yellow');
           tooltip.setAttribute('visible', false);
           sphere.appendChild(tooltip);
-
-          // Tooltip interaction
-          sphere.addEventListener('raycaster-intersected', () => {
-            tooltip.setAttribute('visible', true);
-          });
-
-          sphere.addEventListener('raycaster-intersected-cleared', () => {
-            tooltip.setAttribute('visible', false);
-          });
         });
       })
       .catch(error => console.error('Error loading scatterplot data:', error));
