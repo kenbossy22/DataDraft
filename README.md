@@ -1,6 +1,6 @@
 # DataDraft Development Workspace
 
-This repository contains early development work for the DataDraft AI Agent. The project is moving to a new GitHub repository so you can connect to it with Visual Studio Code. Follow the steps below to create the GitHub repo and push this code to it.
+This repository contains early development work for the DataDraft AI Agent. If you created a new GitHub repository called `DDAI` at `https://github.com/kenbossy22/DDAI`, you can push this code there. Follow the steps below to create the GitHub repo (if you haven't already) and push this code to it so you can connect with Visual Studio Code.
 
 ## 1. Create a new GitHub repository
 
@@ -15,7 +15,7 @@ From your local terminal, run the following commands in this project folder:
 
 ```bash
 # Set the new GitHub repo as the remote named "origin"
- git remote add origin <remote-url>
+ git remote add origin https://github.com/kenbossy22/DDAI.git
 # Push the current history to GitHub
  git push -u origin main  # or "git push -u origin work" if your branch is called work
 ```
