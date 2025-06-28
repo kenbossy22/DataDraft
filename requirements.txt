@@ -1,0 +1,6 @@
+streamlit>=1.18
+pandas>=1.5
+openai>=1.0
+sqlalchemy>=2.0
+pyodbc
+python-dotenv>=1.0
